@@ -6,23 +6,32 @@ import { Message } from './Message'
 export const cli = vorpal()
 
 let username
+let host
 let server
+let commands = ['exit', 'disconnect', 'connect', 'echo', 'broadcast', '@', 'users', 'sysmsg']
+let commandPersist
 
 cli
-  .delimiter(cli.chalk['yellow']('ftd~$'))
+  .delimiter(cli.chalk['yellow']('ChatBox~$'))
 
 cli
-  .mode('connect <username>')
+  .mode('connect <username> [host]', 'Connect to the host server provided (defaults to \'localhost]\' if left out) with username provided.')
   .delimiter(cli.chalk['green']('connected>'))
   .init(function (args, callback) {
     username = args.username
-    server = connect({ host: 'localhost', port: 8080 }, () => {
+    if (args.host !== undefined) {
+      host = args.host
+    } else {
+      host = 'localhost'
+    }
+
+    server = connect({ host: host, port: 8080 }, () => {
       server.write(new Message({ username, command: 'connect' }).toJSON() + '\n')
       callback()
     })
 
     server.on('data', (buffer) => {
-      this.log(Message.fromJSON(buffer).toString())
+      this.log(cli.chalk['blue'](Message.fromJSON(buffer).toString()))
     })
 
     server.on('end', () => {
@@ -30,15 +39,33 @@ cli
     })
   })
   .action(function (input, callback) {
-    const [ command, ...rest ] = words(input)
+    let [ command, ...rest ] = words(input)
+
     const contents = rest.join(' ')
 
-    if (command === 'disconnect') {
-      server.end(new Message({ username, command }).toJSON() + '\n')
-    } else if (command === 'echo') {
-      server.write(new Message({ username, command, contents }).toJSON() + '\n')
-    } else {
-      this.log(`Command <${command}> was not recognized`)
+    switch (command) {
+      case 'exit':
+      case 'disconnect':
+        server.end(new Message({ username, command }).toJSON() + '\n')
+        break
+      case 'echo':
+        server.write(new Message({ username, command, contents }).toJSON() + '\n')
+        commandPersist = 'echo'
+        break
+      case 'broadcast':
+        server.write(new Message({ username, command, contents }).toJSON() + '\n')
+        commandPersist = 'broadcast'
+        break
+      case '@':
+        this.log(`Command <${command}> not yet implemented`)
+        commandPersist = '@'
+        break
+      case 'users':
+        server.write(new Message({ username, command }).toJSON() + '\n')
+        commandPersist = 'users'
+        break
+      default:
+        this.log(`Command <${command}> was not recognized`)
     }
 
     callback()
