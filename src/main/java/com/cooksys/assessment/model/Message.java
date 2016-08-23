@@ -5,14 +5,17 @@ import java.util.Date;
 
 public class Message {
 
-	//  TODO add Date timeStamp to Message as the message is received from the user
-	//  This will allow the ClientHandler to simply pull that out for use in the run method as message.getTimeStamp()
 	private Date timestamp = new Date();
 	private SimpleDateFormat dStr = new SimpleDateFormat("MM.dd.yy zzz hh:mm:ss a ");
 	private String dateStr;
 	private String username;
 	private String command;
 	private String contents;
+	private String targetUser;
+
+	public String getTargetUser() {
+		return targetUser;
+	}
 
 	public Message() {
 		timestamp = new Date();
@@ -36,7 +39,13 @@ public class Message {
 	}
 
 	public void setCommand(String command) {
-		this.command = command;
+		if (command.charAt(0) == '@') {
+			this.command = "@";
+			targetUser = command.substring(1);
+		} else {
+			this.command = command;
+		}
+		
 	}
 
 	public String getContents() {
@@ -55,13 +64,13 @@ public class Message {
 				this.contents = (this.getTimeStamp() + " <" + username + "> (whisper): " + contents);
 				break;
 			case "users":
-				this.contents = (this.getTimeStamp() + ": currently connect users: \n " + contents);
+				this.contents = (this.getTimeStamp() + ": currently connected users: \n " + contents);
 				break;
-			case "connect": //  TODO Needed?
-				this.contents = (this.getTimeStamp() + " <" + username + "> has connected.");
+			case "connect":
+				this.contents = (this.getTimeStamp() + " <" + username + "> has connected to the coolest server in the whole class.");
 				break;
-			case "disconnect": //  TODO Needed?
-				this.contents = (this.getTimeStamp() + " <" + username + "> has disconnected.");
+			case "disconnect":
+				this.contents = (this.getTimeStamp() + " <" + username + "> has disconnected because they are a sad sad soul.");
 				break;
 		}
 	}

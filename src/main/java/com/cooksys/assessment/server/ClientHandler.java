@@ -75,21 +75,11 @@ public class ClientHandler implements Runnable {
 					case "echo":
 						log.info("<{}> echoed message: <{}>", message.getUsername(), message.getContents());
 						Server.msgOne(user, response);
-						writer.flush();
 						break;
 					
 					case "broadcast":
 						log.info("<{}> broadcast message: <{}>", message.getUsername(), message.getContents());
 						Server.msgAll(response);
-//						writer.write(response);
-//						writer.flush();
-						break;
-					
-					case "@":
-						log.info("<{}> set a personal message to \'not yet defined\': <{}>", message.getUsername(), message.getContents());
-						String pmResponse = mapper.writeValueAsString(message);
-						writer.write(pmResponse);
-						writer.flush();
 						break;
 					
 					case "users":
@@ -97,9 +87,19 @@ public class ClientHandler implements Runnable {
 						log.info("<{}> <{}> requested user data", message.getTimeStamp(), message.getUsername());
 						response = mapper.writeValueAsString(message);
 						Server.msgOne(user, response);
-						writer.flush();
 						break;
-				
+						
+					case "@":
+						log.info("<{}> whispered <{}>: <{}>", message.getUsername(), message.getTargetUser(), message.getContents());
+						if ( message.getTargetUser().equals(message.getUsername())) {
+							Server.msgOne(user, response);					
+						} else {
+							Server.msgOne(user, response);		
+							Server.msgOne(message.getTargetUser(), response);
+						}
+						break;
+					default:
+						log.error("Not sure what the crap {} did but they broke it all.", message.getUsername());
 				}
 			}
 
