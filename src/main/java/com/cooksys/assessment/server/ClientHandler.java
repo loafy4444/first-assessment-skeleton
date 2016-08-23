@@ -18,6 +18,8 @@ public class ClientHandler implements Runnable {
 
 	private Socket socket;
 	private int ID;
+	private String user;
+
 
 	public ClientHandler(Socket socket) {
 		super();
@@ -25,13 +27,21 @@ public class ClientHandler implements Runnable {
 		ID = socket.getPort();
 	}
 
+	public Socket getSocket() {
+		return socket;
+	}
+
 	public int getID() {
 			return ID;
 	}
-	
+
+	public String getUser() {
+		return user;
+	}
+
 	public void run() {
 		try {
-
+			
 			ObjectMapper mapper = new ObjectMapper();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -39,54 +49,54 @@ public class ClientHandler implements Runnable {
 			while (!socket.isClosed()) {
 				String raw = reader.readLine();
 				Message message = mapper.readValue(raw, Message.class);
-				
-				//  TODO Add additional command functionality base here.
-								
+				String response = mapper.writeValueAsString(message);
+																
 				switch (message.getCommand()) {
 					
 					case "connect":
 						log.info("<{}> <{}> connected", message.getTimeStamp(), message.getUsername());
-						Server.addUser(ID, message.getUsername());
+						this.user = message.getUsername();
+						message.setContents(message.getCommand());
+						response = mapper.writeValueAsString(message);
+						Server.msgAll(response);
 						log.info("Current Users Logged In: " + Server.getUsers());
-
-						//  TODO add function to notify all users of connection
 						break;
 					
 					case "disconnect":
 						log.info("<{}> <{}> disconnected",  message.getTimeStamp(), message.getUsername());
+						message.setContents(message.getCommand());
+						response = mapper.writeValueAsString(message);
+						Server.msgAll(response);
+						Server.removeClient(this);
 						this.socket.close();
-						Server.removeUser(ID, message.getUsername());
 						log.info("Current Users Logged In: " + Server.getUsers());
-						
-						//  TODO add function to notify all users of disconnect
 						break;
 					
 					case "echo":
-						log.info("<{}> <{}> echoed message: <{}>", message.getTimeStamp(), message.getUsername(), message.getContents());
-						String echoResponse = mapper.writeValueAsString(message);
-						writer.write(echoResponse);
+						log.info("<{}> echoed message: <{}>", message.getUsername(), message.getContents());
+						Server.msgOne(user, response);
 						writer.flush();
 						break;
 					
 					case "broadcast":
-						log.info("<{}> <{}> broadcast message: <{}>", message.getTimeStamp(), message.getUsername(), message.getContents());
-						String broadcastResponse = mapper.writeValueAsString(message);
-						writer.write(broadcastResponse);
-						writer.flush();
+						log.info("<{}> broadcast message: <{}>", message.getUsername(), message.getContents());
+						Server.msgAll(response);
+//						writer.write(response);
+//						writer.flush();
 						break;
 					
 					case "@":
-						log.info("<{}> <{}> set a personal message to \'not yet defined\': <{}>", message.getTimeStamp(), message.getUsername(), message.getContents());
+						log.info("<{}> set a personal message to \'not yet defined\': <{}>", message.getUsername(), message.getContents());
 						String pmResponse = mapper.writeValueAsString(message);
 						writer.write(pmResponse);
 						writer.flush();
 						break;
 					
 					case "users":
-						message.setContents(Server.getUsers());;
+						message.setContents(Server.getUsers().toString());;
 						log.info("<{}> <{}> requested user data", message.getTimeStamp(), message.getUsername());
-						String usersComResponse = mapper.writeValueAsString(message);
-						writer.write(usersComResponse);
+						response = mapper.writeValueAsString(message);
+						Server.msgOne(user, response);
 						writer.flush();
 						break;
 				
@@ -97,4 +107,5 @@ public class ClientHandler implements Runnable {
 			log.error("Something went wrong :/", e);
 		}
 	}
+
 }

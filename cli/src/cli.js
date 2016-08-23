@@ -15,11 +15,11 @@ cli
   .delimiter(cli.chalk['yellow']('ChatBox~$'))
 
 cli
-  .mode('connect <username> [host]', 'Connect to the host server provided (defaults to \'localhost]\' if left out) with username provided.')
+  .mode('connect <username> [host]', 'Connect to the host server provided (default \'localhost\' if left out) with username provided.')
   .delimiter(cli.chalk['green']('connected>'))
   .init(function (args, callback) {
     username = args.username
-    if (args.host !== undefined) {
+    if (args.host !== undefined) { // TODO check working properly
       host = args.host
     } else {
       host = 'localhost'
@@ -31,7 +31,7 @@ cli
     })
 
     server.on('data', (buffer) => {
-      this.log(cli.chalk['blue'](Message.fromJSON(buffer).toString()))
+      this.log(cli.chalk['red'](Message.fromJSON(buffer).toString()))
     })
 
     server.on('end', () => {
@@ -40,13 +40,11 @@ cli
   })
   .action(function (input, callback) {
     let [ command, ...rest ] = words(input)
-
     const contents = rest.join(' ')
 
     switch (command) {
-      case 'exit':
       case 'disconnect':
-        server.end(new Message({ username, command: 'disconnect' }).toJSON() + '\n')
+        server.end(new Message({ username, command }).toJSON() + '\n')
         break
       case 'echo':
         server.write(new Message({ username, command, contents }).toJSON() + '\n')

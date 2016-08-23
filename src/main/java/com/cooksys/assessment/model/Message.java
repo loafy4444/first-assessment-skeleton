@@ -18,13 +18,6 @@ public class Message {
 		timestamp = new Date();
 	}
 	
-	public Message(String username, String command, String contents) {
-		timestamp = new Date();
-		this.username = username;
-		this.command = command;
-		this.contents = contents;
-	}
-	
 	public String getTimeStamp() {
 		dateStr = dStr.format(timestamp);
 		return dateStr;
@@ -51,7 +44,26 @@ public class Message {
 	}
 
 	public void setContents(String contents) {
-		this.contents = contents;
+		switch(command){
+			case "echo":
+				this.contents = (this.getTimeStamp() + " <" + username + "> (echo): " + contents);
+				break;
+			case "broadcast":
+				this.contents = (this.getTimeStamp() + " <" + username + "> (all): " + contents);
+				break;
+			case "@":
+				this.contents = (this.getTimeStamp() + " <" + username + "> (whisper): " + contents);
+				break;
+			case "users":
+				this.contents = (this.getTimeStamp() + ": currently connect users: \n " + contents);
+				break;
+			case "connect": //  TODO Needed?
+				this.contents = (this.getTimeStamp() + " <" + username + "> has connected.");
+				break;
+			case "disconnect": //  TODO Needed?
+				this.contents = (this.getTimeStamp() + " <" + username + "> has disconnected.");
+				break;
+		}
 	}
 
 }
