@@ -3,9 +3,14 @@ import { words } from 'lodash'
 import { connect } from 'net'
 import { Message } from './Message'
 
-// const _ = require('lodash')
-
 export const cli = vorpal()
+
+//  Breaks the command line.
+//  Adding is not advised.
+// const exit = cli.find('exit')
+// if (exit) {
+//   exit.remove()
+// }
 
 let username
 let host
@@ -15,14 +20,14 @@ let commands = ['echo', 'broadcast', '@', 'users', 'disconnect']
 let commandPersist
 
 cli
-  .delimiter(cli.chalk['yellow']('ChatBox~$'))
+  .delimiter(cli.chalk['yellow']('ChatHub~$'))
 
 cli
   .mode('connect <username> [host]', 'Connect to the host server provided (default \'localhost\' if left out) with username provided.')
   .delimiter(cli.chalk['green']('connected>'))
   .init(function (args, callback) {
     username = args.username
-    if (args.host === undefined) { // TODO check working properly
+    if (args.host !== undefined) { // TODO check working properly
       host = args.host
     } else {
       host = 'localhost'
@@ -58,17 +63,12 @@ cli
     let [ command, ...rest ] = words(input, /\S+/g) // Parses out words based on non-whitespace characters
     let contents
 
-    if (!commands.includes(command)) {
+    if (!commands.includes(command) && command.charAt(0) !== '@') {
       contents = (command + ' ' + rest.join(' '))
       command = commandPersist
     } else {
-      contents = rest.join(' ') // TODO does not yet function correctly with @user
+      contents = rest.join(' ')
     }
-
-    // const contents = rest.join(' ')
-
-    // this.log(command)
-    // this.log(contents)
 
     switch (command) {
       case 'disconnect':
@@ -94,6 +94,5 @@ cli
           this.log(`Command <${command}> was not recognized`)
         }
     }
-
     callback()
   })

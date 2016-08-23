@@ -37,7 +37,7 @@ public class Server implements Runnable {
 				clients.add(handler);
 			}
 		} catch (IOException e) {
-			log.error("Something went wrong :/", e);
+			log.error("Server Run Error Noobsauce.", e);
 		}
 	}
 

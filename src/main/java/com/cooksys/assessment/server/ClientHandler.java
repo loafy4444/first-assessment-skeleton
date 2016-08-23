@@ -104,7 +104,16 @@ public class ClientHandler implements Runnable {
 			}
 
 		} catch (IOException e) {
-			log.error("Something went wrong :/", e);
+			try {
+				log.info("<{}> disconnected due to error. ",  user);
+				Server.msgAll(user + " disconnected due to error.");
+				Server.removeClient(this);
+				this.socket.close();
+				log.info("Current Users Logged In: " + Server.getUsers());
+				log.error("Something went wrong :/", e);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 		}
 	}
 
