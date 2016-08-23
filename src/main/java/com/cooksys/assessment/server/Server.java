@@ -3,6 +3,7 @@ package com.cooksys.assessment.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 
@@ -15,6 +16,7 @@ public class Server implements Runnable {
 	private int port;
 	private ExecutorService executor;
 	private ClientHandler handler;
+	private static ArrayList<ClientHandler> clients = new ArrayList<>();
 	private static HashMap<Integer, String> users = new HashMap<>();
 	
 	public Server(int port, ExecutorService executor) {
@@ -32,7 +34,7 @@ public class Server implements Runnable {
 				Socket socket = ss.accept();
 				handler = new ClientHandler(socket);
 				executor.execute(handler);
-				
+				clients.add(handler);
 			}
 		} catch (IOException e) {
 			log.error("Something went wrong :/", e);
@@ -53,7 +55,7 @@ public class Server implements Runnable {
 	
 	//  TODO Implement pm, echo, here?
 	public void privateMessage(int ID, String msg) {
-		
+		users.get(ID);
 	}
 	
 	//  TODO implement broadcast and sysmsg here?

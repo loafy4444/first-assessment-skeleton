@@ -8,7 +8,7 @@ export const cli = vorpal()
 let username
 let host
 let server
-let commands = ['exit', 'disconnect', 'connect', 'echo', 'broadcast', '@', 'users', 'sysmsg']
+let commands = ['echo', 'broadcast', '@', 'users']
 let commandPersist
 
 cli
@@ -46,23 +46,23 @@ cli
     switch (command) {
       case 'exit':
       case 'disconnect':
-        server.end(new Message({ username, command }).toJSON() + '\n')
+        server.end(new Message({ username, command: 'disconnect' }).toJSON() + '\n')
         break
       case 'echo':
         server.write(new Message({ username, command, contents }).toJSON() + '\n')
-        commandPersist = 'echo'
+        commandPersist = command
         break
       case 'broadcast':
         server.write(new Message({ username, command, contents }).toJSON() + '\n')
-        commandPersist = 'broadcast'
+        commandPersist = command
         break
       case '@':
         this.log(`Command <${command}> not yet implemented`)
-        commandPersist = '@'
+        commandPersist = command
         break
       case 'users':
         server.write(new Message({ username, command }).toJSON() + '\n')
-        commandPersist = 'users'
+        commandPersist = command
         break
       default:
         this.log(`Command <${command}> was not recognized`)

@@ -39,6 +39,7 @@ public class ClientHandler implements Runnable {
 			while (!socket.isClosed()) {
 				String raw = reader.readLine();
 				Message message = mapper.readValue(raw, Message.class);
+				
 				//  TODO Add additional command functionality base here.
 								
 				switch (message.getCommand()) {

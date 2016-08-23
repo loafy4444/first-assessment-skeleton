@@ -3,12 +3,7 @@ export class Message {
     return new Message(JSON.parse(buffer.toString()))
   }
 
-// TODO add timestamp functionality
-// add fuction to check message type and set cli.chalk to appropriate color here?
-
-  constructor ({ timestamp, username, command, contents }) {
-    // console.log(timestamp)
-    this.timestamp = timestamp
+  constructor ({ username, command, contents }) {
     this.username = username
     this.command = command
     this.contents = contents
