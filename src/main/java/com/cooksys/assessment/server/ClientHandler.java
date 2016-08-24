@@ -3,8 +3,6 @@ package com.cooksys.assessment.server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.Socket;
 
 import org.slf4j.Logger;
@@ -45,7 +43,6 @@ public class ClientHandler implements Runnable {
 			
 			ObjectMapper mapper = new ObjectMapper();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
 			
 			while (!socket.isClosed()) {
 				String raw = reader.readLine();
@@ -106,7 +103,7 @@ public class ClientHandler implements Runnable {
 						break;
 					
 					case "users":
-						message.setContents(handler.getUsers().toString());;
+						message.setContents(handler.usersCom());
 						log.info("<{}> <{}> requested user data", message.getTimeStamp(), message.getUsername());
 						response = mapper.writeValueAsString(message);
 						handler.msgOne(this.ID, response);

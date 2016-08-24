@@ -4,12 +4,20 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Handler {
 	
-	private ArrayList<ClientHandler> clients = new ArrayList<>();
-	
-	public ArrayList<ClientHandler> getClients() {
+	private List<ClientHandler> clients = Collections.synchronizedList(new ArrayList<>());
+//	synchronized(list) {
+//	    Iterator i = list.iterator(); // Must be in synchronized block
+//	    while (i.hasNext())
+//	        foo(i.next());   
+//	}
+//	private ArrayList<ClientHandler> clients = new ArrayList<>();
+		
+	public List<ClientHandler> getClients() {
 		return clients;
 	}
 
@@ -17,6 +25,14 @@ public class Handler {
 		ArrayList<String> users = new ArrayList<>();
 		for (ClientHandler c : clients) {
 			users.add(c.getUser());
+		}
+		return users;
+	}
+	
+	public String usersCom() {
+		String users = "";
+		for (ClientHandler c : clients) {
+			users += c.getUser() + "\n";
 		}
 		return users;
 	}
@@ -65,10 +81,9 @@ public class Handler {
 	}
 	
 	public boolean validateUserName(String username) {
-		if (username.matches(".*([^a-zA-Z, \\d]).*") 
-//				|| username.startsWith("@") 
-				|| Character.isDigit(username.charAt(0))  ) {
-//				|| username.contains(" ") ) {
+		if (username.matches(".*([^a-zA-Z, \\d]).*")    			
+				|| Character.isDigit(username.charAt(0))		
+				|| username.contains(" ") ) {								
 			return false;
 		} else {
 			return true;

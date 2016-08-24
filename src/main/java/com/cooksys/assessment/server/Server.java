@@ -1,11 +1,8 @@
 package com.cooksys.assessment.server;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 
 import org.slf4j.Logger;

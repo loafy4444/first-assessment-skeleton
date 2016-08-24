@@ -20,15 +20,19 @@ let commands = ['echo', 'broadcast', '@', 'users', 'disconnect']
 let commandPersist
 
 cli
-  .delimiter(cli.chalk['yellow']('ChatHub~$'))
+  .delimiter(cli.chalk['yellow']('ftd~$'))
 
 cli
   .mode('connect <username> [host]', 'Connect to the host server provided (default \'localhost\' if left out) with username provided.')
-  .delimiter(cli.chalk['green']('connected>'))
+  .delimiter(cli.chalk['green']('ChatBox>'))
   .init(function (args, callback) {
     username = args.username
     if (args.host !== undefined) { // TODO check working properly
-      host = args.host
+      if (Number.isNaN(args.host)) {
+        host = args.host
+      } else {
+        host = '10.1.1.' + args.host
+      }
     } else {
       host = 'localhost'
     }
@@ -60,7 +64,7 @@ cli
     })
   })
   .action(function (input, callback) {
-    let [ command, ...rest ] = words(input, /\S+/g) // Parses out words based on non-whitespace characters
+    let [ command, ...rest ] = words(input, /\S+/g)
     let contents
 
     if (!commands.includes(command.toLowerCase()) && command.charAt(0) !== '@') {
@@ -69,31 +73,23 @@ cli
     } else {
       contents = rest.join(' ')
     }
-
-    command = command.toLowerCase()
-
-    switch (command) {
-      case 'echo':
-        server.write(new Message({ username, command, contents }).toJSON() + '\n')
-        commandPersist = command
-        break
-      case 'broadcast':
-        server.write(new Message({ username, command, contents }).toJSON() + '\n')
-        commandPersist = command
-        break
-      case 'users':
-        server.write(new Message({ username, command }).toJSON() + '\n')
-        break
-      case 'disconnect':
-        server.end(new Message({ username, command }).toJSON() + '\n')
-        break
-      default:
-        if (command.charAt(0) === '@') {
-          server.write(new Message({ username, command, contents }).toJSON() + '\n')
-          commandPersist = command
-        } else {
-          this.log(`Command <${command}> was not recognized`)
-        }
+    if (command === undefined) {
+      this.log(`Command was not recognized.  Valid Commands Include: ${commands}`)
+    } else if (command.toLowerCase() === 'echo') {
+      server.write(new Message({ username, command, contents }).toJSON() + '\n')
+      commandPersist = command
+    } else if (command.toLowerCase() === 'broadcast') {
+      server.write(new Message({ username, command, contents }).toJSON() + '\n')
+      commandPersist = command
+    } else if (command.toLowerCase() === 'users') {
+      server.write(new Message({ username, command }).toJSON() + '\n')
+    } else if (command.toLowerCase() === 'disconnect') {
+      server.end(new Message({ username, command }).toJSON() + '\n')
+    } else if (command.toLowerCase().charAt(0) === '@') {
+      server.write(new Message({ username, command, contents }).toJSON() + '\n')
+      commandPersist = command
+    } else {
+      this.log('Not sure what the crap happened but I should look into it.')
     }
     callback()
   })
