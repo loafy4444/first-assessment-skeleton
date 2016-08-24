@@ -43,7 +43,7 @@ public class Message {
 			this.command = "@";
 			targetUser = command.substring(1);
 		} else {
-			this.command = command;
+			this.command = command.toLowerCase();
 		}
 		
 	}
@@ -71,6 +71,12 @@ public class Message {
 				break;
 			case "disconnect":
 				this.contents = (this.getTimeStamp() + " <" + username + "> has disconnected because they are a sad sad soul.");
+				break;
+			case "invaliduser":
+				this.contents =  (this.getTimeStamp() + ": Disconnected due to an invalid username.  May only contain letters and numbers and must start with a letter.");
+				break;
+			case "duplicateusername":
+				this.contents =  (this.getTimeStamp() + ": Disconnected due to a duplicate username.  Please try again with a different name..");
 				break;
 		}
 	}

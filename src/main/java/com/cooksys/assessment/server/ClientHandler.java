@@ -19,11 +19,12 @@ public class ClientHandler implements Runnable {
 	private Socket socket;
 	private int ID;
 	private String user;
+	private Handler handler;
 
-
-	public ClientHandler(Socket socket) {
+	public ClientHandler(Socket socket, Handler handler) {
 		super();
 		this.socket = socket;
+		this.handler = handler;
 		ID = socket.getPort();
 	}
 
@@ -52,64 +53,86 @@ public class ClientHandler implements Runnable {
 				String response = mapper.writeValueAsString(message);
 																
 				switch (message.getCommand()) {
-					
+				
 					case "connect":
-						log.info("<{}> <{}> connected", message.getTimeStamp(), message.getUsername());
-						this.user = message.getUsername();
-						message.setContents(message.getCommand());
-						response = mapper.writeValueAsString(message);
-						Server.msgAll(response);
-						log.info("Current Users Logged In: " + Server.getUsers());
-						break;
-					
+						if (!handler.validateUserName(message.getUsername())) {
+							log.info("<{}> <{}> attempted to connect with an invalid username and was auto-disconnected."
+									, message.getTimeStamp(), message.getUsername());
+							message.setCommand("invaliduser");
+							message.setContents(message.getCommand());
+							response = mapper.writeValueAsString(message);
+							handler.msgOne(this.ID, response);
+							handler.removeClient(this);
+							this.socket.close();
+							break;
+						} else if (handler.duplicateUserName(message.getUsername())) {
+							log.info("<{}> <{}> attempted to connect with a duplicate username and was auto-disconnected."
+									, message.getTimeStamp(), message.getUsername());
+							message.setCommand("duplicateusername");
+							message.setContents(message.getCommand());
+							response = mapper.writeValueAsString(message);
+							handler.msgOne(this.ID, response);
+							handler.removeClient(this);
+							this.socket.close();
+							break;
+						} else {
+							log.info("<{}> <{}> connected", message.getTimeStamp(), message.getUsername());
+							this.user = message.getUsername();
+							message.setContents(message.getCommand());
+							response = mapper.writeValueAsString(message);
+							handler.msgAll(response);
+							log.info("Current Users Logged In: " + handler.getUsers());
+							break;
+						}
+						
 					case "disconnect":
 						log.info("<{}> <{}> disconnected",  message.getTimeStamp(), message.getUsername());
 						message.setContents(message.getCommand());
 						response = mapper.writeValueAsString(message);
-						Server.msgAll(response);
-						Server.removeClient(this);
+						handler.msgAll(response);
+						handler.removeClient(this);
 						this.socket.close();
-						log.info("Current Users Logged In: " + Server.getUsers());
+						log.info("Current Users Logged In: " + handler.getUsers());
 						break;
 					
 					case "echo":
 						log.info("<{}> echoed message: <{}>", message.getUsername(), message.getContents());
-						Server.msgOne(user, response);
+						handler.msgOne(this.ID, response);
 						break;
 					
 					case "broadcast":
 						log.info("<{}> broadcast message: <{}>", message.getUsername(), message.getContents());
-						Server.msgAll(response);
+						handler.msgAll(response);
 						break;
 					
 					case "users":
-						message.setContents(Server.getUsers().toString());;
+						message.setContents(handler.getUsers().toString());;
 						log.info("<{}> <{}> requested user data", message.getTimeStamp(), message.getUsername());
 						response = mapper.writeValueAsString(message);
-						Server.msgOne(user, response);
+						handler.msgOne(this.ID, response);
 						break;
 						
 					case "@":
 						log.info("<{}> whispered <{}>: <{}>", message.getUsername(), message.getTargetUser(), message.getContents());
 						if ( message.getTargetUser().equals(message.getUsername())) {
-							Server.msgOne(user, response);					
-						} else {
-							Server.msgOne(user, response);		
-							Server.msgOne(message.getTargetUser(), response);
+							handler.msgOne(this.ID, response);					
+						} else {							
+							handler.msgOne(this.ID, response);
+							handler.msgOne(handler.getUserID(message.getTargetUser()), response); 
 						}
 						break;
 					default:
-						log.error("Not sure what the crap {} did but they broke it all.", message.getUsername());
+						log.error("Not sure what the crap {} did but they broke their client.", message.getUsername());
 				}
 			}
 
 		} catch (IOException e) {
 			try {
 				log.info("<{}> disconnected due to error. ",  user);
-				Server.msgAll(user + " disconnected due to error.");
-				Server.removeClient(this);
+				handler.msgAll(user + " disconnected due to error.");
+				handler.removeClient(this);
 				this.socket.close();
-				log.info("Current Users Logged In: " + Server.getUsers());
+				log.info("Current Users Logged In: " + handler.getUsers());
 				log.error("Something went wrong :/", e);
 			} catch (IOException e1) {
 				e1.printStackTrace();
@@ -117,4 +140,5 @@ public class ClientHandler implements Runnable {
 		}
 	}
 
+	
 }

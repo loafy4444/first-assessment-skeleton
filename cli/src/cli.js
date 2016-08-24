@@ -63,17 +63,16 @@ cli
     let [ command, ...rest ] = words(input, /\S+/g) // Parses out words based on non-whitespace characters
     let contents
 
-    if (!commands.includes(command) && command.charAt(0) !== '@') {
+    if (!commands.includes(command.toLowerCase()) && command.charAt(0) !== '@') {
       contents = (command + ' ' + rest.join(' '))
       command = commandPersist
     } else {
       contents = rest.join(' ')
     }
 
+    command = command.toLowerCase()
+
     switch (command) {
-      case 'disconnect':
-        server.end(new Message({ username, command }).toJSON() + '\n')
-        break
       case 'echo':
         server.write(new Message({ username, command, contents }).toJSON() + '\n')
         commandPersist = command
@@ -84,7 +83,9 @@ cli
         break
       case 'users':
         server.write(new Message({ username, command }).toJSON() + '\n')
-        commandPersist = command
+        break
+      case 'disconnect':
+        server.end(new Message({ username, command }).toJSON() + '\n')
         break
       default:
         if (command.charAt(0) === '@') {

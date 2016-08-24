@@ -16,10 +16,8 @@ public class Server implements Runnable {
 	
 	private int port;
 	private ExecutorService executor;
-	private ClientHandler handler;
-	private static ArrayList<ClientHandler> clients = new ArrayList<>();
-	
-	//  TODO Arbitrary comment to hopefully allow an Initial Commit for the Day
+	private ClientHandler chandler;
+	private Handler handler;	
 	
 	public Server(int port, ExecutorService executor) {
 		super();
@@ -29,51 +27,18 @@ public class Server implements Runnable {
 
 	public void run() {
 		log.info("Server Started Successfully:  Awaiting Connections");
+		handler = new Handler();
 		ServerSocket ss;
 		try {
 			ss = new ServerSocket(this.port);
 			while (true) {
 				Socket socket = ss.accept();
-				handler = new ClientHandler(socket);
-				executor.execute(handler);
-				clients.add(handler);
+				chandler = new ClientHandler(socket, handler);
+				executor.execute(chandler);
+				handler.addClient(chandler);
 			}
 		} catch (IOException e) {
 			log.error("Server Run Error Noobsauce.", e);
-		}
-	}
-
-	public static ArrayList<ClientHandler> getClients() {
-		return clients;
-	}
-
-	public static ArrayList<String> getUsers() {
-		ArrayList<String> users = new ArrayList<>();
-		for (ClientHandler c : clients) {
-			users.add(c.getUser());
-		}
-		return users;
-	}
-	
-	public static void removeClient(ClientHandler c) {
-		clients.remove(c);
-	}
-	
-	public static void msgAll(String msg) throws IOException {
-		for (ClientHandler c : clients) {
-			PrintWriter writer = new PrintWriter(new OutputStreamWriter(c.getSocket().getOutputStream()));
-			writer.write(msg);
-			writer.flush();
-		}
-	}
-	
-	public static void msgOne(String user, String msg) throws IOException {
-		for (ClientHandler c : clients) {
-			if ( c.getUser().equals(user)) {
-				PrintWriter writer = new PrintWriter(new OutputStreamWriter(c.getSocket().getOutputStream()));
-				writer.write(msg);
-				writer.flush();
-			}
 		}
 	}
 }
