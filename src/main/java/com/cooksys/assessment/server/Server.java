@@ -19,6 +19,8 @@ public class Server implements Runnable {
 	private ClientHandler handler;
 	private static ArrayList<ClientHandler> clients = new ArrayList<>();
 	
+	//  TODO Arbitrary comment to hopefully allow an Initial Commit for the Day
+	
 	public Server(int port, ExecutorService executor) {
 		super();
 		this.port = port;
