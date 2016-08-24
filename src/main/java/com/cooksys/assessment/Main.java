@@ -16,18 +16,18 @@ public class Main {
 
 	public static void main(String[] args) {
 		ExecutorService executor = Executors.newCachedThreadPool();
-		
+
 		Server server = new Server(8080, executor);
-		
+
 		Future<?> done = executor.submit(server);
-		
+
 		try {
 			done.get();
 			executor.shutdown();
 			executor.awaitTermination(5, TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException e) {
-			log.error("Something went wrong :/", e);
+			log.error("Something went wrong in the Main class Main method.  Yup, it got borked.", e);
 		}
 	}
-	
+
 }

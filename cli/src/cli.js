@@ -73,6 +73,7 @@ cli
     } else {
       contents = rest.join(' ')
     }
+
     if (command === undefined) {
       this.log(`Command was not recognized.  Valid Commands Include: ${commands}`)
     } else if (command.toLowerCase() === 'echo') {
