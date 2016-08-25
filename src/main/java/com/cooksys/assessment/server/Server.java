@@ -1,8 +1,6 @@
 package com.cooksys.assessment.server;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -42,14 +40,14 @@ public class Server implements Runnable {
 				
 				Socket socket = ss.accept();
 				
-				if (handler.checkIP(socket.getInetAddress())) {
+				if (handler.checkIP(socket.getInetAddress())) {  //  Check for duplicate IPs because users (especially these users) are malicious
 					msg = new Message();
 					msg.setCommand("duplicateip");
 					msg.setContents(msg.getCommand());
 					String response = mapper.writeValueAsString(msg);
-					handler.msgThis(socket, response);
+					handler.msgOne(socket, response);
 					socket.close();
-				
+					
 				} else {
 					
 					chandler = new ClientHandler(socket, handler, mapper);

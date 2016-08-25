@@ -13,18 +13,14 @@ public class Message {
 	private String contents;
 	private String targetUser;
 
-	public String getTargetUser() {
-		return targetUser;
-	}
-
 	public Message() {
 		timestamp = new Date();
 	}
-	
-//	public Message() {
-//		timestamp = new Date();
-//	}
 
+	public String getTargetUser() {
+		return targetUser;
+	}
+	
 	public String getTimeStamp() {
 		dateStr = dStr.format(timestamp);
 		return dateStr;
@@ -49,7 +45,6 @@ public class Message {
 		} else {
 			this.command = command.toLowerCase();
 		}
-
 	}
 
 	public String getContents() {
@@ -59,35 +54,35 @@ public class Message {
 	public void setContents(String contents) {
 		switch (command) {
 		case "echo":
-			this.contents = (this.getTimeStamp() + " <" + username + "> (echo): " + contents);
+			this.contents = (this.getTimeStamp() + "<" + username + "> (echo): " + contents);
 			break;
 		case "broadcast":
-			this.contents = (this.getTimeStamp() + " <" + username + "> (all): " + contents);
+			this.contents = (this.getTimeStamp() + "<" + username + "> (all): " + contents);
 			break;
 		case "@":
-			this.contents = (this.getTimeStamp() + " <" + username + "> (whisper): " + contents);
+			this.contents = (this.getTimeStamp() + "<" + username + "> (whisper): " + contents);
 			break;
 		case "users":
 			this.contents = (this.getTimeStamp() + ": currently connected users:" + contents);
 			break;
 		case "connect":
-			this.contents = (this.getTimeStamp() + " <" + username + "> has connected to the coolest server in the whole class.");
+			this.contents = (this.getTimeStamp() + "<" + username + "> has connected to the coolest server in the whole class.");
 			break;
 		case "disconnect":
-			this.contents = (this.getTimeStamp() + " <" + username + "> has disconnected because they are a sad sad soul.");
+			this.contents = (this.getTimeStamp() + "<" + username + "> has disconnected because they are a sad sad soul.");
 			break;
 		case "usernotfound":
-			this.contents = (this.getTimeStamp() + " <" + targetUser + "> is not a valid user.");
+			this.contents = (this.getTimeStamp() + "<" + targetUser + "> is not a valid user.");
 			break;
 		case "invaliduser":
 			this.contents = (this.getTimeStamp()
-					+ ": Connection rejected due to an invalid username. \nMay only contain letters and numbers and must start with a letter.");
+					+ ": Connection rejected due to an invalid username.\nMay only contain letters and numbers and must start with a letter.");
 			break;
 		case "duplicateusername":
-			this.contents = (this.getTimeStamp() + ": Connection rejected due to a duplicate username.  \nPlease try again with a different name.");
+			this.contents = (this.getTimeStamp() + ": Connection rejected due to a duplicate username. \nPlease try again with a different name.");
 			break;
 		case "duplicateip":
-			this.contents = (this.getTimeStamp() + ": Connection rejected due to too many IP...  way too many...");
+			this.contents = (this.getTimeStamp() + ": Connection rejected due to a duplicate IP.\nShutting down both connections now.");
 			break;
 		}
 	}

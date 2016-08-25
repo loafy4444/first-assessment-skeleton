@@ -1,5 +1,6 @@
 package com.cooksys.assessment.server;
 
+
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -13,20 +14,23 @@ public class Handler {
 
 	private List<ClientHandler> clients = Collections.synchronizedList(new ArrayList<>());
 
-	public List<ClientHandler> getClients() {
-		return clients;
+	public void addClient(ClientHandler c) {
+		clients.add(c);
+	}
+
+	public void removeClient(ClientHandler c) {
+		clients.remove(c);
 	}
 
 	public boolean checkIP(InetAddress ip) {
-		int num = 0;
 		synchronized (clients) {
 			for (ClientHandler c : clients) {
 				if (ip.equals(c.getUserIP())) {
-					num++;
+					return true;
 				}
 			}
 		}
-		return num>= 3 ? true : false;
+		return false;
 	}
 
 	public ArrayList<String> getUsers() {
@@ -39,33 +43,15 @@ public class Handler {
 		return users;
 	}
 
-	public ArrayList<Integer> getUserIDs() {
-		ArrayList<Integer> IDs = new ArrayList<>();
-		synchronized (clients) {
-			for (ClientHandler c : clients) {
-				IDs.add(c.getID());
-			}
-		}
-		return IDs;
-	}
-
-	public int getUserID(String user) {
+	public Socket getUserSocket(String user) {
 		synchronized (clients) {
 			for (ClientHandler c : clients) {
 				if (c.getUser().equals(user)) {
-					return c.getID();
+					return c.getSocket();
 				}
 			}
 		}
-		return 0;
-	}
-
-	public void addClient(ClientHandler c) {
-		clients.add(c);
-	}
-
-	public void removeClient(ClientHandler c) {
-		clients.remove(c);
+		return null;
 	}
 
 	public void msgAll(String msg) throws IOException {
@@ -73,27 +59,15 @@ public class Handler {
 			for (ClientHandler c : clients) {
 				PrintWriter writer = new PrintWriter(new OutputStreamWriter(c.getSocket().getOutputStream()));
 				writer.write(msg);
-				writer.flush();
+				writer.close();
 			}
 		}
 	}
 
-	public void msgOne(int ID, String msg) throws IOException {
-		synchronized (clients) {
-			for (ClientHandler c : clients) {
-				if (c.getID() == ID) {
-					PrintWriter writer = new PrintWriter(new OutputStreamWriter(c.getSocket().getOutputStream()));
-					writer.write(msg);
-					writer.flush();
-				}
-			}
-		}
-	}
-
-	public void msgThis(Socket socket, String msg) throws IOException {
+	public void msgOne(Socket socket, String msg) throws IOException {
 		PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
 		writer.write(msg);
-		writer.flush();
+		writer.close();
 
 	}
 
@@ -105,16 +79,15 @@ public class Handler {
 		return users;
 	}
 
-	public boolean validateUserName(String username) {
-		if (username.matches(".*([^\\w]).*") // (".*([^a-zA-Z\\d\\s]).*")
-				|| Character.isDigit(username.charAt(0))) {
+	public boolean validateUserName(String username) {   //  Validates that username does not contain spaces or special characters
+		if (username.matches(".*([^\\w]).*") || Character.isDigit(username.charAt(0))) {
 			return false;
 		} else {
 			return true;
 		}
 	}
 
-	public boolean duplicateUserName(String username) {
+	public boolean duplicateUserName(String username) {  //  Check if username is already in use on server
 		for (String user : getUsers()) {
 			if (username.equalsIgnoreCase(user)) {
 				return true;

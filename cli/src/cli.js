@@ -5,19 +5,14 @@ import { Message } from './Message'
 
 export const cli = vorpal()
 
-//  Breaks the command line.
-//  Adding is not advised.
-// const exit = cli.find('exit')
-// if (exit) {
-//   exit.remove()
-// }
-
 let username
 let host
 let server
 let msg
-let commands = ['echo', 'broadcast', '@', 'users', 'disconnect']
+let commands = ['echo', 'broadcast', '@', 'users', 'disconnect',
+      'kirby', 'kirby1', 'kirby2', 'kirbyparty', 'partypooper']
 let commandPersist
+let kirbycount = 0
 
 cli
   .delimiter(cli.chalk['yellow']('ftd~$'))
@@ -27,7 +22,8 @@ cli
   .delimiter(cli.chalk['green']('ChatBox>'))
   .init(function (args, callback) {
     username = args.username
-    if (args.host !== undefined) { // TODO check working properly
+
+    if (args.host !== undefined) {
       if (Number.isNaN(args.host)) {
         host = args.host
       } else {
@@ -44,8 +40,8 @@ cli
 
     server.on('data', (buffer) => {
       msg = Message.fromJSON(buffer)
-      switch (msg.command) {
-        case 'echo':
+      switch (msg.command) {  // These colors may look terrible on other clients so feel free to change them.
+        case 'echo':          // My client has a dark background which almost requires the bg colors to be able to read them all.
           this.log(cli.chalk['bgRed'](msg.toString()))
           break
         case 'broadcast':
@@ -89,8 +85,45 @@ cli
     } else if (command.toLowerCase().charAt(0) === '@') {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
       commandPersist = command
+    } else if (command.toLowerCase() === 'kirby') {
+      server.write(new Message({ username, command: 'broadcast', contents: '^(\' - \')^ ^(\' - \')^ ^(\' - \')^' }).toJSON() + '\n')
+      commandPersist = command
+    } else if (command.toLowerCase() === 'kirby1') {
+      server.write(new Message({ username, command: 'broadcast', contents: ' (>\'-\')> ^(\' - \')^ <(\'-\'<) ^(\' - \')^ (>\'-\')>' }).toJSON() + '\n')
+      commandPersist = command
+    } else if (command.toLowerCase() === 'kirby2') {
+      server.write(new Message({ username, command: 'broadcast', contents: '<(\'-\'<) ^(\' - \')^ (>\'-\')> ^(\' - \')^ <(\'-\'<)' }).toJSON() + '\n')
+      commandPersist = command
+    } else if (command.toLowerCase() === 'kirbyparty') {  // Best command ever.  Just trust me.
+      kirbyFunc()
+      server.write(new Message({ username, command: 'broadcast', contents: 'KIRBY PARTY!!!!' }).toJSON() + '\n')
+    } else if (command.toLowerCase() === 'partypooper') {  // Lamest command ever.  You have been warned.
+      clearInterval(myKirby)
     } else {
       this.log('Not sure what the crap happened but I should look into it.')
     }
     callback()
   })
+
+let myKirby
+function kirbyFunc () {
+  myKirby = setInterval(kirbyPartyFunc, 750)
+}
+
+function kirbyPartyFunc () {
+  switch (kirbycount % 4) {
+    case 0:
+      server.write(new Message({ username, command: 'broadcast', contents: '^(\' - \')^ (>\'-\')> ^(\' - \')^ <(\'-\'<) ^(\' - \')^ (>\'-\')>' }).toJSON() + '\n')
+      break
+    case 1:
+      server.write(new Message({ username, command: 'broadcast', contents: '<(\'-\'<) ^(\' - \')^ (>\'-\')> ^(\' - \')^ <(\'-\'<) ^(\' - \')^' }).toJSON() + '\n')
+      break
+    case 2:
+      server.write(new Message({ username, command: 'broadcast', contents: '^(\' - \')^ <(\'-\'<) ^(\' - \')^ (>\'-\')> ^(\' - \')^ <(\'-\'<)' }).toJSON() + '\n')
+      break
+    case 3:
+      server.write(new Message({ username, command: 'broadcast', contents: '(>\'-\')> ^(\' - \')^ <(\'-\'<) ^(\' - \')^ (>\'-\')> ^(\' - \')^' }).toJSON() + '\n')
+      break
+  }
+  kirbycount++
+}
