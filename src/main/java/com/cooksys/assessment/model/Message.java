@@ -20,6 +20,10 @@ public class Message {
 	public Message() {
 		timestamp = new Date();
 	}
+	
+//	public Message() {
+//		timestamp = new Date();
+//	}
 
 	public String getTimeStamp() {
 		dateStr = dStr.format(timestamp);
@@ -77,10 +81,13 @@ public class Message {
 			break;
 		case "invaliduser":
 			this.contents = (this.getTimeStamp()
-					+ ": Connection rejected due to an invalid username.  May only contain letters and numbers and must start with a letter.");
+					+ ": Connection rejected due to an invalid username. \nMay only contain letters and numbers and must start with a letter.");
 			break;
 		case "duplicateusername":
-			this.contents = (this.getTimeStamp() + ": Connection rejected due to a duplicate username.  Please try again with a different name..");
+			this.contents = (this.getTimeStamp() + ": Connection rejected due to a duplicate username.  \nPlease try again with a different name.");
+			break;
+		case "duplicateip":
+			this.contents = (this.getTimeStamp() + ": Connection rejected due to too many IP...  way too many...");
 			break;
 		}
 	}

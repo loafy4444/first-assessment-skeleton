@@ -3,6 +3,7 @@ package com.cooksys.assessment.server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.net.Socket;
 
 import org.slf4j.Logger;
@@ -16,14 +17,22 @@ public class ClientHandler implements Runnable {
 
 	private Socket socket;
 	private int ID;
+	private InetAddress userIP;
 	private String user;
 	private Handler handler;
+	private ObjectMapper mapper;
 
-	public ClientHandler(Socket socket, Handler handler) {
+	public ClientHandler(Socket socket, Handler handler, ObjectMapper mapper) {
 		super();
 		this.socket = socket;
 		this.handler = handler;
+		this.mapper = mapper;
 		ID = socket.getPort();
+		userIP = socket.getInetAddress();
+	}
+
+	public InetAddress getUserIP() {
+		return userIP;
 	}
 
 	public Socket getSocket() {
@@ -41,7 +50,6 @@ public class ClientHandler implements Runnable {
 	public void run() {
 		try {
 
-			ObjectMapper mapper = new ObjectMapper();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
 			while (!socket.isClosed()) {

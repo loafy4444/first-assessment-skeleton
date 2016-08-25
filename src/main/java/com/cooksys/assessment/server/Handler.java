@@ -3,6 +3,8 @@ package com.cooksys.assessment.server;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +15,18 @@ public class Handler {
 
 	public List<ClientHandler> getClients() {
 		return clients;
+	}
+
+	public boolean checkIP(InetAddress ip) {
+		int num = 0;
+		synchronized (clients) {
+			for (ClientHandler c : clients) {
+				if (ip.equals(c.getUserIP())) {
+					num++;
+				}
+			}
+		}
+		return num>= 3 ? true : false;
 	}
 
 	public ArrayList<String> getUsers() {
@@ -76,6 +90,13 @@ public class Handler {
 		}
 	}
 
+	public void msgThis(Socket socket, String msg) throws IOException {
+		PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+		writer.write(msg);
+		writer.flush();
+
+	}
+
 	public String usersCom() {
 		String users = "";
 		for (ClientHandler c : clients) {
@@ -85,7 +106,7 @@ public class Handler {
 	}
 
 	public boolean validateUserName(String username) {
-		if (username.matches(".*([\\s, ^a-zA-Z, \\d]).*") 
+		if (username.matches(".*([^\\w]).*") // (".*([^a-zA-Z\\d\\s]).*")
 				|| Character.isDigit(username.charAt(0))) {
 			return false;
 		} else {
