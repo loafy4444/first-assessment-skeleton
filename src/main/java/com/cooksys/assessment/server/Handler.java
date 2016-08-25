@@ -85,7 +85,8 @@ public class Handler {
 	}
 
 	public boolean validateUserName(String username) {
-		if (username.matches(".*([^a-zA-Z, \\d]).*") || Character.isDigit(username.charAt(0)) || username.contains(" ")) {
+		if (username.matches(".*([\\s, ^a-zA-Z, \\d]).*") 
+				|| Character.isDigit(username.charAt(0))) {
 			return false;
 		} else {
 			return true;
